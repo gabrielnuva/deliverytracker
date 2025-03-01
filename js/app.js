@@ -441,7 +441,11 @@ function loadDeliveriesTable(filters = {}) {
         filteredDeliveries = filteredDeliveries.filter(d => {
             const deliveryDate = new Date(d.startTime);
             deliveryDate.setHours(0, 0, 0, 0); // Establecer a inicio del día
-            return deliveryDate.getTime() === filterDate.getTime();
+            return (
+                deliveryDate.getFullYear() === filterDate.getFullYear() &&
+                deliveryDate.getMonth() === filterDate.getMonth() &&
+                deliveryDate.getDate() === filterDate.getDate()
+            );
         });
     }
     
