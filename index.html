@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Delivery Tracker</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Restaurant Delivery Tracker</h1>
+            <div id="user-info">
+                <span id="username">Usuario no identificado</span>
+                <button id="logout-btn" class="btn btn-danger">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- Sección de Login -->
+            <section id="login-section" class="active-section">
+                <h2>Iniciar Sesión</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="username">Usuario:</label>
+                        <input type="text" id="username-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña:</label>
+                        <input type="password" id="password-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Perfil:</label>
+                        <select id="role-select">
+                            <option value="deliverista">Deliverista</option>
+                            <option value="supervisor">Supervisor</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Ingresar</button>
+                </form>
+            </section>
+
+            <!-- Sección de Deliverista -->
+            <section id="deliverista-section" class="hidden-section">
+                <h2>Panel de Deliverista</h2>
+                
+                <div class="action-buttons">
+                    <button id="start-delivery-btn" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Iniciar Entrega
+                    </button>
+                </div>
+
+                <div id="camera-container" class="hidden">
+                    <h3>Captura del Ticket</h3>
+                    <div class="camera-view">
+                        <video id="camera-view" autoplay></video>
+                        <button id="capture-btn" class="btn btn-success">
+                            <i class="fas fa-camera"></i> Capturar
+                        </button>
+                        <button id="cancel-capture-btn" class="btn btn-danger">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                    <canvas id="photo-canvas" class="hidden"></canvas>
+                </div>
+
+                <div class="deliveries-list">
+                    <h3>Entregas Pendientes</h3>
+                    <div id="pending-deliveries">
+                        <!-- Las entregas pendientes se cargarán dinámicamente aquí -->
+                        <p class="empty-message">No hay entregas pendientes</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección de Supervisor -->
+            <section id="supervisor-section" class="hidden-section">
+                <h2>Panel de Supervisor</h2>
+                
+                <!-- Pestañas de navegación -->
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="dashboard-tab">Dashboard</button>
+                    <button class="tab-btn" data-tab="users-tab">Gestión de Usuarios</button>
+                </div>
+                
+                <!-- Tab de Dashboard -->
+                <div id="dashboard-tab" class="tab-content active-tab">
+                    <div class="filter-controls">
+                        <div class="form-group">
+                            <label for="date-filter">Fecha:</label>
+                            <input type="date" id="date-filter">
+                        </div>
+                        <div class="form-group">
+                            <label for="deliverista-filter">Deliverista:</label>
+                            <select id="deliverista-filter">
+                                <option value="all">Todos</option>
+                                <!-- Opciones de deliveristas se cargarán dinámicamente -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="restaurant-filter">Restaurante:</label>
+                            <select id="restaurant-filter">
+                                <option value="all">Todos</option>
+                                <option value="ricos">Rico's</option>
+                                <option value="pizzamia">Pizzamía</option>
+                            </select>
+                        </div>
+                        <button id="apply-filters-btn" class="btn btn-primary">Aplicar Filtros</button>
+                    </div>
+
+                    <div class="dashboard">
+                        <h3>Resumen de Entregas</h3>
+                        <div class="stats-cards">
+                            <div class="stat-card">
+                                <h4>Total Entregas</h4>
+                                <p id="total-deliveries">0</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>Tiempo Promedio</h4>
+                                <p id="avg-time">0 min</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>Entrega más Rápida</h4>
+                                <p id="fastest-delivery">0 min</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>Entrega más Lenta</h4>
+                                <p id="slowest-delivery">0 min</p>
+                            </div>
+                        </div>
+
+                        <div class="deliveries-table">
+                            <h3>Detalle de Entregas</h3>
+                            <table id="deliveries-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Deliverista</th>
+                                        <th>Cliente</th>
+                                        <th>Restaurante</th>
+                                        <th>Inicio</th>
+                                        <th>Fin</th>
+                                        <th>Duración</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="deliveries-table-body">
+                                    <!-- Los datos de entregas se cargarán dinámicamente aquí -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tab de Gestión de Usuarios -->
+                <div id="users-tab" class="tab-content">
+                    <div class="user-management">
+                        <div class="user-form-container">
+                            <h3>Crear Nuevo Usuario</h3>
+                            <form id="user-form">
+                                <div class="form-group">
+                                    <label for="new-username">Nombre de Usuario:</label>
+                                    <input type="text" id="new-username" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new-password">Contraseña:</label>
+                                    <input type="password" id="new-password" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new-name">Nombre Completo:</label>
+                                    <input type="text" id="new-name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new-role">Rol:</label>
+                                    <select id="new-role">
+                                        <option value="deliverista">Deliverista</option>
+                                        <option value="supervisor">Supervisor</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-user-plus"></i> Crear Usuario
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div class="users-list-container">
+                            <h3>Usuarios Existentes</h3>
+                            <div class="users-table-container">
+                                <table id="users-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Usuario</th>
+                                            <th>Nombre</th>
+                                            <th>Rol</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="users-table-body">
+                                        <!-- Los usuarios se cargarán dinámicamente aquí -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Modal para ver detalles de entrega -->
+            <div id="delivery-details-modal" class="modal hidden">
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <h3>Detalles de Entrega</h3>
+                    <div class="delivery-images">
+                        <div class="image-container">
+                            <h4>Ticket de Inicio</h4>
+                            <img id="start-ticket-img" src="" alt="Ticket de inicio">
+                            <p id="start-time"></p>
+                        </div>
+                        <div class="image-container">
+                            <h4>Foto de Entrega</h4>
+                            <img id="delivery-location-img" src="" alt="Ubicación de entrega">
+                            <p id="end-time"></p>
+                        </div>
+                    </div>
+                    <div class="delivery-info">
+                        <p><strong>Deliverista:</strong> <span id="detail-deliverista"></span></p>
+                        <p><strong>Cliente:</strong> <span id="detail-client"></span></p>
+                        <p><strong>Restaurante:</strong> <span id="detail-restaurant"></span></p>
+                        <p><strong>Tiempo Total:</strong> <span id="detail-duration"></span></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal para editar usuario -->
+            <div id="edit-user-modal" class="modal hidden">
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <h3>Editar Usuario</h3>
+                    <form id="edit-user-form">
+                        <input type="hidden" id="edit-user-id">
+                        <div class="form-group">
+                            <label for="edit-username">Nombre de Usuario:</label>
+                            <input type="text" id="edit-username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-password">Nueva Contraseña:</label>
+                            <input type="password" id="edit-password" placeholder="Dejar en blanco para mantener la actual">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-name">Nombre Completo:</label>
+                            <input type="text" id="edit-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-role">Rol:</label>
+                            <select id="edit-role">
+                                <option value="deliverista">Deliverista</option>
+                                <option value="supervisor">Supervisor</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Modal para ingresar información del cliente -->
+            <div id="client-info-modal" class="modal hidden">
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <h3>Información del Cliente</h3>
+                    <form id="client-info-form">
+                        <div class="form-group">
+                            <label for="client-name">Nombre del Cliente o Referencia:</label>
+                            <input type="text" id="client-name" placeholder="Ej: Juan Pérez o Apto 502" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="client-notes">Notas Adicionales (opcional):</label>
+                            <textarea id="client-notes" rows="3" placeholder="Detalles adicionales sobre la entrega"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check"></i> Guardar e Iniciar Entrega
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2023 Restaurant Delivery Tracker</p>
+        </footer>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html> 
