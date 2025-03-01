@@ -101,12 +101,30 @@ function handleClientInfoSubmit(e) {
         return;
     }
     
+    // Validar que se haya seleccionado un restaurante
+    if (!selectedRestaurant) {
+        alert('Por favor, seleccione un restaurante');
+        return;
+    }
+    
+    // Obtener el nombre formateado del restaurante según la selección
+    let restaurantName;
+    if (selectedRestaurant === 'ricos') {
+        restaurantName = 'Rico\'s';
+    } else if (selectedRestaurant === 'pizzamia') {
+        restaurantName = 'Pizzamía';
+    } else {
+        console.error('Valor de restaurante no reconocido:', selectedRestaurant);
+        alert('Error al seleccionar el restaurante. Por favor, inténtelo de nuevo.');
+        return;
+    }
+    
     // Crear la nueva entrega con la información del cliente
     const newDelivery = {
         id: generateId(),
         deliveristaId: currentUser.id,
         deliveristaName: currentUser.name,
-        restaurant: selectedRestaurant === 'ricos' ? 'Rico\'s' : 'Pizzamía',
+        restaurant: restaurantName,
         startTime: new Date(),
         endTime: null,
         duration: null,
