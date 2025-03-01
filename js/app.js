@@ -107,17 +107,8 @@ function handleClientInfoSubmit(e) {
         return;
     }
     
-    // Obtener el nombre formateado del restaurante según la selección
-    let restaurantName;
-    if (selectedRestaurant === 'ricos') {
-        restaurantName = 'Rico\'s';
-    } else if (selectedRestaurant === 'pizzamia') {
-        restaurantName = 'Pizzamía';
-    } else {
-        console.error('Valor de restaurante no reconocido:', selectedRestaurant);
-        alert('Error al seleccionar el restaurante. Por favor, inténtelo de nuevo.');
-        return;
-    }
+    // Usar el valor seleccionado directamente (los valores en el HTML son "Ricos" y "Pizzamia")
+    const restaurantName = selectedRestaurant;
     
     // Crear la nueva entrega con la información del cliente
     const newDelivery = {
