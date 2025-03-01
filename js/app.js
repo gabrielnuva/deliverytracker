@@ -92,6 +92,8 @@ function handleClientInfoSubmit(e) {
     
     const clientName = clientNameInput.value.trim();
     const clientNotes = clientNotesInput.value.trim();
+    const restaurantSelect = document.getElementById('restaurant-select');
+    const selectedRestaurant = restaurantSelect.value;
     
     // Validar que se haya ingresado un nombre o referencia
     if (!clientName) {
@@ -104,7 +106,7 @@ function handleClientInfoSubmit(e) {
         id: generateId(),
         deliveristaId: currentUser.id,
         deliveristaName: currentUser.name,
-        restaurant: getRandomRestaurant(),
+        restaurant: selectedRestaurant === 'ricos' ? 'Rico\'s' : 'Pizzamía',
         startTime: new Date(),
         endTime: null,
         duration: null,
@@ -434,9 +436,12 @@ function loadDeliveriesTable(filters = {}) {
     
     if (filters.date) {
         const filterDate = new Date(filters.date);
+        filterDate.setHours(0, 0, 0, 0); // Establecer a inicio del día
+        
         filteredDeliveries = filteredDeliveries.filter(d => {
             const deliveryDate = new Date(d.startTime);
-            return deliveryDate.toDateString() === filterDate.toDateString();
+            deliveryDate.setHours(0, 0, 0, 0); // Establecer a inicio del día
+            return deliveryDate.getTime() === filterDate.getTime();
         });
     }
     
@@ -445,7 +450,12 @@ function loadDeliveriesTable(filters = {}) {
     }
     
     if (filters.restaurant && filters.restaurant !== 'all') {
-        filteredDeliveries = filteredDeliveries.filter(d => d.restaurant.toLowerCase().includes(filters.restaurant.toLowerCase()));
+        filteredDeliveries = filteredDeliveries.filter(d => {
+            const deliveryRestaurant = d.restaurant.toLowerCase();
+            // Comparación más flexible para restaurantes
+            return deliveryRestaurant.includes(filters.restaurant.toLowerCase()) || 
+                   filters.restaurant.toLowerCase().includes(deliveryRestaurant);
+        });
     }
     
     deliveriesTableBody.innerHTML = '';
@@ -766,11 +776,6 @@ function generateId() {
 function getNextUserId() {
     const maxId = users.reduce((max, user) => Math.max(max, user.id), 0);
     return maxId + 1;
-}
-
-function getRandomRestaurant() {
-    const restaurants = ['Ricos', 'Pizzamia'];
-    return restaurants[Math.floor(Math.random() * restaurants.length)];
 }
 
 function formatDateTime(date) {
