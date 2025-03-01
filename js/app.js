@@ -435,17 +435,37 @@ function loadDeliveriesTable(filters = {}) {
     let filteredDeliveries = [...deliveries];
     
     if (filters.date) {
-        const filterDate = new Date(filters.date);
-        filterDate.setHours(0, 0, 0, 0); // Establecer a inicio del día
+        // Suponemos que filters.date viene en formato 'YYYY-MM-DD' desde un input type="date"
+        const dateParts = filters.date.split('-');
+        if (dateParts.length !== 3) {
+            console.error('Formato de fecha inválido:', filters.date);
+            return;
+        }
+        const year = parseInt(dateParts[0], 10);
+        const month = parseInt(dateParts[1], 10) - 1; // Restamos 1 porque los meses en JS son 0-11
+        const day = parseInt(dateParts[2], 10);
         
+        const filterDate = new Date(year, month, day);
+        filterDate.setHours(0, 0, 0, 0); // Establecemos la hora al inicio del día
+        
+        console.log('Fecha del filtro:', filterDate, 'Timestamp:', filterDate.getTime());
+    
         filteredDeliveries = filteredDeliveries.filter(d => {
             const deliveryDate = new Date(d.startTime);
-            deliveryDate.setHours(0, 0, 0, 0); // Establecer a inicio del día
-            return (
+            if (isNaN(deliveryDate.getTime())) {
+                console.log('Fecha inválida en entrega ID:', d.id);
+                return false;
+            }
+            deliveryDate.setHours(0, 0, 0, 0);
+            console.log('Entrega ID:', d.id, 'Fecha:', deliveryDate, 'Timestamp:', deliveryDate.getTime());
+            
+            const coincide = (
                 deliveryDate.getFullYear() === filterDate.getFullYear() &&
                 deliveryDate.getMonth() === filterDate.getMonth() &&
                 deliveryDate.getDate() === filterDate.getDate()
             );
+            console.log('¿Coincide con el filtro?', coincide);
+            return coincide;
         });
     }
     
