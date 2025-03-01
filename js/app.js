@@ -769,7 +769,7 @@ function getNextUserId() {
 }
 
 function getRandomRestaurant() {
-    const restaurants = ['Rico\'s', 'Pizzamía'];
+    const restaurants = ['Ricos', 'Pizzamia'];
     return restaurants[Math.floor(Math.random() * restaurants.length)];
 }
 
