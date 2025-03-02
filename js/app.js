@@ -92,6 +92,8 @@ function handleClientInfoSubmit(e) {
     
     const clientName = clientNameInput.value.trim();
     const clientNotes = clientNotesInput.value.trim();
+    const restaurantSelect = document.getElementById('restaurant-select');
+    const selectedRestaurant = restaurantSelect.value;
     
     // Validar que se haya ingresado un nombre o referencia
     if (!clientName) {
@@ -99,12 +101,21 @@ function handleClientInfoSubmit(e) {
         return;
     }
     
+    // Validar que se haya seleccionado un restaurante
+    if (!selectedRestaurant) {
+        alert('Por favor, seleccione un restaurante');
+        return;
+    }
+    
+    // Usar el valor seleccionado directamente (los valores en el HTML son "Ricos" y "Pizzamia")
+    const restaurantName = selectedRestaurant;
+    
     // Crear la nueva entrega con la información del cliente
     const newDelivery = {
         id: generateId(),
         deliveristaId: currentUser.id,
         deliveristaName: currentUser.name,
-        restaurant: getRandomRestaurant(),
+        restaurant: restaurantName,
         startTime: new Date(),
         endTime: null,
         duration: null,
@@ -433,10 +444,37 @@ function loadDeliveriesTable(filters = {}) {
     let filteredDeliveries = [...deliveries];
     
     if (filters.date) {
-        const filterDate = new Date(filters.date);
+        // Suponemos que filters.date viene en formato 'YYYY-MM-DD' desde un input type="date"
+        const dateParts = filters.date.split('-');
+        if (dateParts.length !== 3) {
+            console.error('Formato de fecha inválido:', filters.date);
+            return;
+        }
+        const year = parseInt(dateParts[0], 10);
+        const month = parseInt(dateParts[1], 10) - 1; // Restamos 1 porque los meses en JS son 0-11
+        const day = parseInt(dateParts[2], 10);
+        
+        const filterDate = new Date(year, month, day);
+        filterDate.setHours(0, 0, 0, 0); // Establecemos la hora al inicio del día
+        
+        console.log('Fecha del filtro:', filterDate, 'Timestamp:', filterDate.getTime());
+    
         filteredDeliveries = filteredDeliveries.filter(d => {
             const deliveryDate = new Date(d.startTime);
-            return deliveryDate.toDateString() === filterDate.toDateString();
+            if (isNaN(deliveryDate.getTime())) {
+                console.log('Fecha inválida en entrega ID:', d.id);
+                return false;
+            }
+            deliveryDate.setHours(0, 0, 0, 0);
+            console.log('Entrega ID:', d.id, 'Fecha:', deliveryDate, 'Timestamp:', deliveryDate.getTime());
+            
+            const coincide = (
+                deliveryDate.getFullYear() === filterDate.getFullYear() &&
+                deliveryDate.getMonth() === filterDate.getMonth() &&
+                deliveryDate.getDate() === filterDate.getDate()
+            );
+            console.log('¿Coincide con el filtro?', coincide);
+            return coincide;
         });
     }
     
@@ -445,7 +483,12 @@ function loadDeliveriesTable(filters = {}) {
     }
     
     if (filters.restaurant && filters.restaurant !== 'all') {
-        filteredDeliveries = filteredDeliveries.filter(d => d.restaurant.toLowerCase().includes(filters.restaurant.toLowerCase()));
+        filteredDeliveries = filteredDeliveries.filter(d => {
+            const deliveryRestaurant = d.restaurant.toLowerCase();
+            // Comparación más flexible para restaurantes
+            return deliveryRestaurant.includes(filters.restaurant.toLowerCase()) || 
+                   filters.restaurant.toLowerCase().includes(deliveryRestaurant);
+        });
     }
     
     deliveriesTableBody.innerHTML = '';
@@ -766,11 +809,6 @@ function generateId() {
 function getNextUserId() {
     const maxId = users.reduce((max, user) => Math.max(max, user.id), 0);
     return maxId + 1;
-}
-
-function getRandomRestaurant() {
-    const restaurants = ['Rico\'s', 'Pizzamía'];
-    return restaurants[Math.floor(Math.random() * restaurants.length)];
 }
 
 function formatDateTime(date) {
